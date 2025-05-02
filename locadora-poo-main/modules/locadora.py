@@ -7,16 +7,26 @@ class App():
         pass
 
     def cadastrar_veiculo(self):
+        tipo = input("Digite o tipo de veículo (carro/moto): ").lower()
+
         marca = input('Digite a MARCA do veiculo: ')
         modelo = input('Digite o MODELO do veiculo: ')
         ano = input('Digite o ANO do veiculo: ')
-        placa = input('Digite a PLACA do carro: ')
+        placa = input('Digite a PLACA do veiculo: ')
         quilometragem = int(input('Digite a QUILOMETRAGEM do veiculo: '))
-        valorDaDiaria = int(input('Digite o VALOR DA DIARIA do Carro: '))
-        car = self.Carro(marca, modelo, ano, placa, quilometragem, valorDaDiaria)
+        valorDaDiaria = int(input('Digite o VALOR DA DIARIA do veiculo: '))
+
+        if tipo == "carro":
+            veiculo = self.Carro(marca, modelo, ano, placa, quilometragem, valorDaDiaria)
+        elif tipo == "moto":
+            veiculo = self.Moto(marca, modelo, ano, placa, quilometragem, valorDaDiaria)
+        else:
+            print("Tipo de veículo inválido.")
+            return None
+
         util.pauseAndClear()
-        print(f'{car} cadastrado!')
-        return car
+        print(f'{veiculo} cadastrado!')
+        return veiculo
 
     def consultar_disponibilidade_de_veiculos(self, carList):
         carDisponiveis = []
@@ -103,9 +113,9 @@ class App():
                 carDisponiveis.append(veicle)
 
         for i, car in enumerate(carDisponiveis):
-            print(f'\ncarro {i}: {car}\n')
+            print(f'\nVeículo {i}: {car}\n')
 
-        resp = int(input('Digite o número do carro que deseja alugar: '))
+        resp = int(input('Digite o número do veiculo que deseja alugar: '))
         car = carDisponiveis[resp]
         print(f'\ncarro: {car}')
         util.pauseAndClear()
@@ -133,18 +143,19 @@ class App():
         user = userList[resp]
         print(f'\nuser: {user}\n')
 
-        if user.historicoDeCarrosAlugados != []:
+        if user.historicoVeiculoAlugados != []:
             print('alugueis do cliente: ')
-            for i, aluguel in enumerate(user.historicoDeCarrosAlugados):
+            for i, aluguel in enumerate(user.historicoVeiculoAlugados):
                 print(f'\naluguel {i}: {aluguel}\n')
             
             resp = int(input('Digite o número do seu aluguel: '))
-            aluguel = user.historicoDeCarrosAlugados[resp]
+            aluguel = user.historicoVeiculoAlugados[resp]
             print(aluguel)
             print(f'carro devolvido e disponivel!')
             return aluguel
         else:
             print(f'o cliente {user.nome} não tem carros alugados.')
+
     def remover_veiculo(self, carList, placa):
         # Verifica se o veículo com a placa fornecida existe na lista
         veiculo = next((car for car in carList if car.placa == placa), None)
@@ -174,8 +185,9 @@ class App():
     def alterar_veiculo(self, carList):
         placa = input("Digite a placa do veículo que deseja alterar: ")
 
-        for carro in carList:
-            if carro.placa == placa:
+        for veiculo in carList:
+            if veiculo.placa == placa:
+                print(f"Veículo encontrado: {veiculo}")
                 print("O que você deseja alterar?")
                 print("1 - Quilometragem")
                 print("2 - Valor da diária")
@@ -184,14 +196,14 @@ class App():
                 if opcao == "1":
                     try:
                         nova_km = float(input("Digite a nova quilometragem: "))
-                        carro.set_quilometragem(nova_km)
+                        veiculo.set_quilometragem(nova_km)
                         print("Quilometragem atualizada com sucesso.")
                     except ValueError:
                         print("Valor inválido. A quilometragem não foi alterada.")
                 elif opcao == "2":
                     try:
                         novo_valor = float(input("Digite o novo valor da diária: "))
-                        carro.set_valorDaDiaria(novo_valor)
+                        veiculo.set_valorDaDiaria(novo_valor)
                         print("Valor da diária atualizado com sucesso.")
                     except ValueError:
                         print("Valor inválido. O valor da diária não foi alterado.")
@@ -247,30 +259,45 @@ class App():
         def __repr__(self):
             return f'\n{self.nomeClasse}: \n{self.marca}, {self.modelo}, {self.ano}, placa: {self.placa}, {self.quilometragem}Km, {self.valorDaDiaria} R$ por dia\n'
 
+    class Moto(Veiculo):
+        def __init__(self, marca, modelo, ano, placa, quilometragem, valorDaDiaria):
+            super().__init__(marca, modelo, ano, placa, quilometragem, valorDaDiaria)
+            self.placa = placa
+            self.quilometragem = quilometragem
+            self.valorDaDiaria = valorDaDiaria
+            self.nomeClasse = self.__class__.__name__
+
+        def __str__(self):
+            return f'{self.nomeClasse}: {self.marca}, {self.modelo}, {self.ano}'
+
+        def __repr__(self):
+            return f'\n{self.nomeClasse}: \n{self.marca}, {self.modelo}, {self.ano}, placa: {self.placa}, {self.quilometragem}Km, {self.valorDaDiaria} R$ por dia\n'
+
+
     class Cliente():
         def __init__(self, nome):
             self.nome = nome
             self.id = randint(2, 5000) * randint(2, 5000)
-            self.historicoDeCarrosAlugados = []
+            self.historicoVeiculoAlugados = []
             self.nomeClasse = self.__class__.__name__
 
         def __str__(self):
-            if self.historicoDeCarrosAlugados == []:
+            if self.historicoVeiculoAlugados == []:
                 return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n[Sem histórico]'
             else:
-                return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n{self.historicoDeCarrosAlugados}'
+                return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n{self.historicoVeiculoAlugados}'
 
         def __repr__(self):
-            if self.historicoDeCarrosAlugados == []:
+            if self.historicoVeiculoAlugados == []:
                 return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n[Sem histórico]'
             else:
-                return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n{self.historicoDeCarrosAlugados}'
+                return f'{self.nomeClasse}: {self.nome}, id: {self.id}, historico de aluguel:\n{self.historicoVeiculoAlugados}'
 
         def atualizar_aluguel(self, aluguel):
-            self.historicoDeCarrosAlugados.append(aluguel)
+            self.historicoVeiculoAlugados.append(aluguel)
 
         def remover_aluguel(self, aluguel):
-            self.historicoDeCarrosAlugados.remove(aluguel)
+            self.historicoVeiculoAlugados.remove(aluguel)
 
     class Aluguel:
         def __init__(self, user, car, dataIni, dataFim):
